@@ -14,7 +14,7 @@
 | 阶段 | 主题 | 目标 | 状态 |
 | --- | --- | --- | --- |
 | 0 | 环境与全局地图 | 能启动、跑测试、知道入口和目录职责 | 未开始 |
-| 1 | 消息流与 Agent Loop | 理解 inbound -> context -> runner -> outbound | 未开始 |
+| 1 | 消息流与 Agent Loop | 理解 inbound -> context -> runner -> outbound | 进行中 |
 | 2 | Agent Runner / Harness 核心 | 理解模型调用、工具循环、注入、截断和错误恢复 | 未开始 |
 | 3 | 工具系统与安全边界 | 能新增或审查一个 tool，知道文件、网络、shell guard | 未开始 |
 | 4 | Provider / Channel 扩展 | 理解适配层如何把外部模型和聊天平台接入核心 | 未开始 |
@@ -195,16 +195,24 @@
 | 日期 | 进度 | 关键收获 | 待补问题 |
 | --- | --- | --- | --- |
 | 2026-05-18 | 建立学习路线 | 初步确定从消息流、runner、tools、providers、memory、WebUI 六条线推进 | 待确认你想先从源码阅读、运行调试，还是架构图开始 |
+| 2026-05-18 | 阶段 1 导学：消息流主链路 | `BaseChannel._handle_message()` 将平台消息归一化为 `InboundMessage`；`MessageBus` 用 inbound/outbound 两个 async queue 解耦 channel 和 agent core；`AgentLoop.run()` 负责消费 inbound、按 session 派发，并把同 session 的中途追加消息路由到 pending queue；一次 turn 由 `RESTORE -> COMPACT -> COMMAND -> BUILD -> RUN -> SAVE -> RESPOND` 状态机组织 | 需要通过自测确认是否能独立追踪从用户输入到回复发送的路径 |
 
 ## 问题池
 
-- 暂无。
+- 阶段 1 自测：`InboundMessage.session_key` 的默认构成是什么？为什么它对 session 隔离重要？
+- 阶段 1 自测：为什么 `MessageBus` 不直接调用 channel 或 agent，而是使用 queue？
+- 阶段 1 自测：同一个 session 在 agent 正在处理时又收到一条消息，`AgentLoop.run()` 如何处理？
+- 阶段 1 自测：`BUILD` 和 `RUN` 两个状态的边界是什么？
+
+## 本轮评价
+
+2026-05-18：已完成阶段 1 的第一轮导学，但还没有收到你的自测回答，因此只能评价“已接触核心概念，掌握度待验证”。下一步需要你回答问题池中的 4 个问题，我会据此判断是否进入 `AgentRunner` 主循环，还是先补一遍 `AgentLoop` 状态机。
 
 ## 掌握度自评
 
 | 能力项 | 1 生疏 | 2 能定位 | 3 能解释 | 4 能修改 | 5 能设计 |
 | --- | --- | --- | --- | --- | --- |
-| 消息流 |  |  |  |  |  |
+| 消息流 | 待自测 |  |  |  |  |
 | Agent runner |  |  |  |  |  |
 | Tool 系统 |  |  |  |  |  |
 | 安全边界 |  |  |  |  |  |
@@ -212,4 +220,3 @@
 | Channel 扩展 |  |  |  |  |  |
 | Memory/session |  |  |  |  |  |
 | WebUI/gateway |  |  |  |  |  |
-
